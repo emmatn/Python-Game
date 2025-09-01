@@ -57,7 +57,7 @@ def get_block(size):
     path = join("assets", "Terrain", "Terrain.png")
     image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
-    rect = pygame.Rect(96, 0, size , size) # load diff terrain, find coord of top left corner 
+    rect = pygame.Rect(96, 128, size , size) # load diff terrain, find coord of top left corner 
     surface.blit(image, (0,0), rect)
     return pygame.transform.scale2x(surface)
             
@@ -100,11 +100,20 @@ class Player(pygame.sprite.Sprite):
     # picks up pace with every tile 
     
     def loop(self, fps):
-         # self.y_vel += min(1, (self.fall_count / fps) * self.GRAVITY)
+        self.y_vel += min(1, (self.fall_count / fps) * self.GRAVITY)
         self.move(self.x_vel, self.y_vel)
         
         self.fall_count += 1
         self.update_sprite()
+        
+    def landed(self):
+        self.fall_count = 0 
+        self.y_vel = 0
+        self.jump_count = 0
+    
+    def hit_head(self):
+        self.count = 0
+        self.y_vel *= -1 # bounce away when hit head
     
     def update_sprite(self):
         sprite_sheet = "idle"
@@ -162,7 +171,22 @@ def get_background(name):
     
     return tiles, image 
 
-def handle_move(player):
+def handle_vertical_collision(player, objects, dy):
+    collided_objects = []
+    for obj in objects:
+        if pygame.sprite.collide_mask(player, obj): # tell me if i am colliding w object
+            if dy > 0:
+                player.rect.bottom = obj.rect.top # set feet equal to top of block
+                player.landed()
+            elif dy < 0:
+                player.rect.top = obj.rect.bottom # set head equal to top of block (COLLIDE NOT THROUGH)
+                player.hit_head()
+                
+        collided_objects.append(obj)
+        
+    return collided_objects
+
+def handle_move(player, objects):
     keys = pygame.key.get_pressed()
     
     player.x_vel = 0
@@ -170,6 +194,8 @@ def handle_move(player):
         player.move_left(PLAYER_VEL)
     if keys[pygame.K_RIGHT]:
         player.move_right(PLAYER_VEL)
+        
+    handle_vertical_collision(player, objects, player.y_vel)
         
 def draw(window, background, bg_image, player, objects):
     for tile in background: 
@@ -205,7 +231,7 @@ def main(window):
                 break
         
         player.loop(FPS) # what moves player
-        handle_move(player)
+        handle_move(player, floor)
         draw(window,background,bg_image, player, floor)
     
     pygame.quit()
