@@ -1,0 +1,11 @@
+Steps: 
+    1. game setup
+    2. background 
+    3. create player 
+    4. movement 
+    5. add gravity
+    6. sprite (characters, split images, rotate)
+    7. animate player 
+    7. collision
+    
+
