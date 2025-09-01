@@ -8,6 +8,7 @@ Steps:
     7. animate player 
     8. collision
     9. blocks
+    10. jumps
 
     
 

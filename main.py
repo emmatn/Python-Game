@@ -78,6 +78,14 @@ class Player(pygame.sprite.Sprite):
         self.direction = "left"
         self.animation_count = 0
         self.fall_count = 0 # air time to increment velocity
+        self.jump_count = 0
+        
+    def jump(self):
+        self.y_vel = -self.GRAVITY * 8 # 8 is speed of jump
+        self.animation_count = 0
+        self.jump_count += 1
+        if self.jump_count == 1:
+            self.fall_count = 0
            
     def move(self, dx, dy):
         self.rect.x += dx
@@ -117,7 +125,14 @@ class Player(pygame.sprite.Sprite):
     
     def update_sprite(self):
         sprite_sheet = "idle"
-        if self.x_vel != 0:
+        if self.y_vel != 0:
+            if self.jump_count == 1:
+                sprite_sheet = "jump"
+            elif self.jump_count == 2:
+                sprite_sheet = "double_jump"
+        elif self.y_vel > self.GRAVITY*2: 
+            sprite_sheet = "fall"
+        elif self.x_vel != 0:
             sprite_sheet = "run"
         
         sprite_sheet_name = sprite_sheet + "_" + self.direction
@@ -134,8 +149,8 @@ class Player(pygame.sprite.Sprite):
          # mapping of pixels within sprite; allows pixel perfection collision
         self.mask = pygame.mask.from_surface(self.sprite)
         
-    def draw(self, wind):
-        wind.blit(self.sprite, (self.rect.x, self.rect.y))
+    def draw(self, wind, offset_x):
+        wind.blit(self.sprite, (self.rect.x - offset_x, self.rect.y))
 
 class Objects(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, name=None):
@@ -146,8 +161,8 @@ class Objects(pygame.sprite.Sprite):
         self.height = height 
         self.name = name
         
-    def draw(self, wind):
-        wind.blit(self.image, (self.rect.x, self.rect.y))
+    def draw(self, wind, offset_x):
+        wind.blit(self.image, (self.rect.x - offset_x, self.rect.y))
 
 class Block(Objects):
     def __init__(self, x, y, size):
@@ -197,14 +212,14 @@ def handle_move(player, objects):
         
     handle_vertical_collision(player, objects, player.y_vel)
         
-def draw(window, background, bg_image, player, objects):
+def draw(window, background, bg_image, player, objects, offset_x):
     for tile in background: 
         window.blit(bg_image, tile) # draw background image into this tile position 
     
     for obj in objects:
-        obj.draw(window)
+        obj.draw(window, offset_x)
         
-    player.draw(window)
+    player.draw(window, offset_x)
         
     pygame.display.update() 
  
@@ -219,7 +234,8 @@ def main(window):
     floor = [Block(i * block_size, HEIGHT - block_size, block_size) 
              for i in range(-WIDTH // block_size, WIDTH*2 // block_size)]
     
-    blocks = [Block(0, HEIGHT-block_size, block_size)]
+    offset_x = 0
+    scroll_area_width = 200 # start scrolling when 200 pixels to L or R 
     
     run = True 
     while run: 
@@ -229,10 +245,19 @@ def main(window):
             if event.type == pygame.QUIT:
                 run = False
                 break
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and player.jump_count < 2:
+                    player.jump()
         
         player.loop(FPS) # what moves player
         handle_move(player, floor)
-        draw(window,background,bg_image, player, floor)
+        draw(window,background,bg_image, player, floor, offset_x)
+         
+         # explanation? 
+        if ((player.rect.right - offset_x >= WIDTH - scroll_area_width and player.x_vel > 0) or (
+            (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0)):
+            offset_x += player.x_vel
     
     pygame.quit()
     quit()
