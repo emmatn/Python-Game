@@ -6,6 +6,8 @@ Steps:
     5. add gravity
     6. sprite (characters, split images, rotate)
     7. animate player 
-    7. collision
+    8. collision
+    9. blocks
+
     
 
