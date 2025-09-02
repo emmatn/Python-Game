@@ -279,8 +279,7 @@ def handle_move(player, objects):
     for obj in to_check: 
         if obj and obj.name == "fire":
             player.been_hit()
-    
-        
+ 
 def draw(window, background, bg_image, player, objects, offset_x):
     for tile in background: 
         window.blit(bg_image, tile) # draw background image into this tile position 
@@ -299,11 +298,13 @@ def main(window):
     
     block_size = 96
     player = Player(100, 100, 50, 50)
+    LEVEL_LENGTH = 200 # blocks 
      # create blocks that go to left and right of screen
     fire = Fire(100, HEIGHT - block_size - 64, 16, 32)
     fire.on()
-    floor = [Block(i * block_size, HEIGHT - block_size, block_size) 
-             for i in range(-WIDTH // block_size, WIDTH*2 // block_size)]
+    floor = [Block(i * block_size, HEIGHT - block_size, block_size)
+             for i in range(-10, LEVEL_LENGTH)] 
+            # for i in range(-WIDTH // block_size, WIDTH*2 // block_size)]
      # asterisk breaks all elements in floor in objects var
     objects = [*floor, Block(0, HEIGHT - block_size*2, block_size), 
                Block(block_size*3, HEIGHT - block_size*4, block_size),
