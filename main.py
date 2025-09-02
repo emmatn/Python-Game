@@ -294,7 +294,7 @@ def draw(window, background, bg_image, player, objects, offset_x):
  # includes event loop 
 def main(window):
     clock = pygame.time.Clock()
-    background, bg_image = get_background("Pink.png")
+    background, bg_image = get_background("Pink2.png")
     
     block_size = 96
     player = Player(100, 100, 50, 50)
