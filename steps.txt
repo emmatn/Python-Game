@@ -10,5 +10,11 @@ Steps:
     9. blocks
     10. jumps
 
+Next: 
+    - add more blocks 
+    - add coins 
+    - add start and end 
+    - add decor 
+
     
 
